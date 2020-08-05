@@ -1,0 +1,5 @@
+
+use the schema in all the following files and paste it in the sql section of php my admin.
+create all these tables in a database called demo.if you wish to change database name do change the name in file config.php as well.
+
+

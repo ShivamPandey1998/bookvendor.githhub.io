@@ -1,0 +1,14 @@
+CREATE DEFINER=`root`@`localhost` EVENT `final_req` ON SCHEDULE EVERY 1 DAY STARTS '2020-04-19 00:53:00' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
+  INSERT  INTO delivery(id,book,location,rank,requested_at) 
+Select X.id,X.book,X.location,ROW_NUMBER() OVER (PARTITION BY X.location
+              ORDER BY X.id,X.book) as token,X.requested_at
+         from ((
+select b1.book,b1.id,u.location,b1.requested_at,(select count(*)
+from book_req as b
+where b.book= b1.book and (b.credits> b1.credits or( b.credits= b1.credits and b.requested_at<b1.requested_at)))+1 as rank,i.quantity
+from book_req as b1,book_info as i,users as u where b1.book=i.book and b1.id=u.id) as X)
+where X.rank<=X.quantity-(select count(*) from delivery where book=X.book and status='p')
+order by location,id,book;
+DELETE FROM book_req where (book_req.id,book_req.book,book_req.requested_at) IN (SELECT X.id,X.book,X.requested_at from delivery as X where X.status='p');
+
+END

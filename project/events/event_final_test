@@ -1,0 +1,8 @@
+CREATE DEFINER=`root`@`localhost` EVENT `finaltest` ON SCHEDULE EVERY 1 DAY STARTS '2020-04-19 00:03:00' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN 
+
+INSERT INTO collection(id,subject,book,location,quantity,rank)
+select b1.id,b1.subject,b1.book,b1.location,b1.quantity,ROW_NUMBER()OVER(PARTITION BY b1.location ORDER BY b1.id) as token
+from donation_interest as b1;
+delete from donation_interest;
+
+END
